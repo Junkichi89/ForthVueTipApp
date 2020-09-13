@@ -9,17 +9,27 @@ export default new Vuex.Store({
     user: {
       username: null,
       tip: null
-    }
+    },
+    RegUsers: []
   },
   mutations: {
     setUser(state, userInfo) {
       state.user.username = userInfo.username,
       state.user.tip = userInfo.tip;
+    },
+    setRegUser(state, RegUsersInfo) {
+      state.RegUsers.push(RegUsersInfo);
+    },
+    deleteUsers(state) {
+      state.RegUsers = [];
     }
   },
   getters: {
     user(state) {
       return state.user;
+    },
+    RegUsers(state) {
+      return Array.from(new Set(state.RegUsers));
     }
   },
   actions: {
@@ -33,6 +43,7 @@ export default new Vuex.Store({
             user.updateProfile({
               displayName: userInfo.username
             });
+            // context.dispatch('getRegUser', userInfo);
             console.log('success');
             resolve(res);
           })
@@ -56,6 +67,7 @@ export default new Vuex.Store({
           .signInWithEmailAndPassword(userInfo.email, userInfo.password)
           .then((data) => {
             console.log('Good Job,Mate');
+            // context.dispatch('getRegUser', userInfo);
             resolve(data);
           })
           .catch((error) => {
@@ -67,7 +79,7 @@ export default new Vuex.Store({
     getDBuser: function (context, user) {
       const db = firebase.firestore();
       const users = db.collection('users');
-      console.log(user);
+      console.log(users);
       users.where('email', '==', user.email).get().then(data => {
         if (data.empty) {
           console.log('No matching data');
@@ -76,6 +88,7 @@ export default new Vuex.Store({
         data.forEach(doc => {
           const matchUser = doc.data();
           context.commit('setUser', matchUser);
+
           console.log(matchUser);
         });
       })
@@ -83,11 +96,31 @@ export default new Vuex.Store({
           console.log('Error getting documents', err);
         });
     },
+    getRegUser: function (context, user) {
+      let db = firebase.firestore();
+      let users = db.collection('users');
+      users.get().then(data => {
+        context.commit('deleteUsers');
+        if (data.empty) {
+          console.log('No data');
+          return;
+        } else {
+          data.forEach(doc => {
+            let regUser = doc.data();
+            console.log(regUser);
+            if (regUser.email !== user.email) {
+              context.commit('setRegUser', regUser);
+            }
+          });
+        }
+      })
+    },
     signOut: function () {
       firebase
         .auth()
         .signOut()
         .then(() => {
+          // context.commit('deleteUsers');
         })
     },
   },
