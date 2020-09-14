@@ -10,26 +10,26 @@ export default new Vuex.Store({
       username: null,
       tip: null
     },
-    RegUsers: []
+    dbUsers: []
   },
   mutations: {
     setUser(state, userInfo) {
       state.user.username = userInfo.username,
       state.user.tip = userInfo.tip;
     },
-    setRegUser(state, RegUsersInfo) {
-      state.RegUsers.push(RegUsersInfo);
+    setDbUser(state, dbUsersInfo) {
+      state.dbUsers.push(dbUsersInfo);
     },
-    deleteUsers(state) {
-      state.RegUsers = [];
+    deleteDbUsers(state) {
+      state.dbUsers = [];
     }
   },
   getters: {
     user(state) {
       return state.user;
     },
-    RegUsers(state) {
-      return Array.from(new Set(state.RegUsers));
+    dbUsers(state) {
+      return Array.from(new Set(state.dbUsers));
     }
   },
   actions: {
@@ -73,7 +73,7 @@ export default new Vuex.Store({
           });
       })
     },
-    getDBuser: function (context, user) {
+    getCurrentUser: function (context, user) {
       const db = firebase.firestore();
       const users = db.collection('users');
       users.where('email', '==', user.email).get().then(data => {
@@ -90,19 +90,19 @@ export default new Vuex.Store({
           console.log('Error getting documents', err);
         });
     },
-    getRegUser: function (context, user) {
-      let db = firebase.firestore();
-      let users = db.collection('users');
+    getDbUser: function (context, user) {
+      const db = firebase.firestore();
+      const users = db.collection('users');
       users.get().then(data => {
-        context.commit('deleteUsers');
+        context.commit('deleteDbUsers');
         if (data.empty) {
           console.log('No data');
           return;
         } else {
           data.forEach(doc => {
-            let regUser = doc.data();
-            if (regUser.email !== user.email) {
-              context.commit('setRegUser', regUser);
+            const dbUser = doc.data();
+            if (dbUser.email !== user.email) {
+              context.commit('setDbUser', dbUser);
             }
           });
         }

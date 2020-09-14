@@ -17,16 +17,16 @@
           <h3>ユーザ名</h3>
         </td>
       </tr>
-      <tr v-for="user in RegUsers" :key="user.id">
+      <tr v-for="user in dbUsers" :key="user.id">
         <td>{{ user.username}}</td>
         <td>
           <div class="example-modal-window">
             <button @click="openModal(user)">walletを見る</button>
-            <wallet-modal v-show="showContent" @close="closeModal">
+            <wallet-modal v-show="content" @close="closeModal">
               <template slot="header">
-                <p>{{ showUser.username }}さんの残高</p>
+                <p>{{ modalUser.username }}さんの残高</p>
               </template>
-              <template slot="body">{{ showUser.tip}}</template>
+              <template slot="body">{{ modalUser.tip}}</template>
               <template slot="footer"></template>
             </wallet-modal>
           </div>
@@ -50,8 +50,8 @@ export default {
   components: { walletModal },
   data() {
     return {
-      showContent: false,
-      showUser: '',
+      content: false,
+      modalUser: '',
     };
   },
   created() {
@@ -60,8 +60,8 @@ export default {
         console.log('No user is signed in.');
       } else {
         const curUser = firebase.auth().currentUser;
-        this.$store.dispatch('getDBuser', curUser);
-        this.$store.dispatch('getRegUser', curUser);
+        this.$store.dispatch('getCurrentUser', curUser);
+        this.$store.dispatch('getDbUser', curUser);
       }
     });
   },
@@ -72,8 +72,8 @@ export default {
     tip() {
       return this.$store.getters.user.tip;
     },
-    RegUsers() {
-      return this.$store.getters.RegUsers;
+    dbUsers() {
+      return this.$store.getters.dbUsers;
     },
   },
   methods: {
@@ -82,10 +82,10 @@ export default {
       this.$router.push('/Login');
     },
     openModal: function (user) {
-      (this.showContent = true), (this.showUser = user);
+      (this.content = true), (this.modalUser = user);
     },
     closeModal: function () {
-      this.showContent = false;
+      this.content = false;
     },
     clickEvent: function () {
       this.$emit('from-child');
