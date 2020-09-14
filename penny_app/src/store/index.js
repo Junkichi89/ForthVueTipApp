@@ -42,8 +42,7 @@ export default new Vuex.Store({
             const user = res.user;
             user.updateProfile({
               displayName: userInfo.username
-            });
-            // context.dispatch('getRegUser', userInfo);
+            })
             console.log('success');
             resolve(res);
           })
@@ -57,7 +56,6 @@ export default new Vuex.Store({
     sendFireStore(context, user) {
       const db = firebase.firestore();
       db.collection('users').doc().set(user);
-
     },
     //既存userのログイン
     signIn: function (context, userInfo) {
@@ -67,7 +65,6 @@ export default new Vuex.Store({
           .signInWithEmailAndPassword(userInfo.email, userInfo.password)
           .then((data) => {
             console.log('Good Job,Mate');
-            // context.dispatch('getRegUser', userInfo);
             resolve(data);
           })
           .catch((error) => {
@@ -79,7 +76,6 @@ export default new Vuex.Store({
     getDBuser: function (context, user) {
       const db = firebase.firestore();
       const users = db.collection('users');
-      console.log(users);
       users.where('email', '==', user.email).get().then(data => {
         if (data.empty) {
           console.log('No matching data');
@@ -88,8 +84,6 @@ export default new Vuex.Store({
         data.forEach(doc => {
           const matchUser = doc.data();
           context.commit('setUser', matchUser);
-
-          console.log(matchUser);
         });
       })
         .catch(err => {
@@ -107,7 +101,6 @@ export default new Vuex.Store({
         } else {
           data.forEach(doc => {
             let regUser = doc.data();
-            console.log(regUser);
             if (regUser.email !== user.email) {
               context.commit('setRegUser', regUser);
             }
@@ -120,7 +113,6 @@ export default new Vuex.Store({
         .auth()
         .signOut()
         .then(() => {
-          // context.commit('deleteUsers');
         })
     },
   },
