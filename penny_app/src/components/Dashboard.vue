@@ -17,10 +17,19 @@
           <h3>ユーザ名</h3>
         </td>
       </tr>
-      <tr>
-        <td>{{ }}</td>
+      <tr v-for="user in dbUsers" :key="user.id">
+        <td>{{ user.username}}</td>
         <td>
-          <button>walletを見る</button>
+          <div class="example-modal-window">
+            <button @click="openModal(user)">walletを見る</button>
+            <wallet-modal v-show="content" @close="closeModal">
+              <template slot="header">
+                <p>{{ modalUser.username }}さんの残高</p>
+              </template>
+              <template slot="body">{{ modalUser.tip}}</template>
+              <template slot="footer"></template>
+            </wallet-modal>
+          </div>
         </td>
         <td>
           <button>送る</button>
@@ -34,11 +43,16 @@
 
 <script>
 import firebase from 'firebase';
+import walletModal from './walletModal.vue';
 
 export default {
   name: 'Dashboard',
+  components: { walletModal },
   data() {
-    return {};
+    return {
+      content: false,
+      modalUser: '',
+    };
   },
   created() {
     firebase.auth().onAuthStateChanged((user) => {
@@ -46,22 +60,35 @@ export default {
         console.log('No user is signed in.');
       } else {
         const curUser = firebase.auth().currentUser;
-        this.$store.dispatch('getDBuser', curUser);
+        this.$store.dispatch('getCurrentUser', curUser);
+        this.$store.dispatch('getDbUser', curUser);
       }
     });
   },
   computed: {
     username() {
-      return this.$store.state.user.username;
+      return this.$store.getters.user.username;
     },
     tip() {
-      return this.$store.state.user.tip;
+      return this.$store.getters.user.tip;
+    },
+    dbUsers() {
+      return this.$store.getters.dbUsers;
     },
   },
   methods: {
     signOut() {
       this.$store.dispatch('signOut');
       this.$router.push('/Login');
+    },
+    openModal: function (user) {
+      (this.content = true), (this.modalUser = user);
+    },
+    closeModal: function () {
+      this.content = false;
+    },
+    clickEvent: function () {
+      this.$emit('from-child');
     },
   },
 };
@@ -83,5 +110,29 @@ a {
 }
 table {
   margin: auto;
+}
+#overlay {
+  /*要素を重ねた時の順番*/
+  z-index: 1;
+
+  /*画面全体を覆う設定*/
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  /*画面の中央に要素を表示させる設定*/
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#content {
+  z-index: 2;
+  width: 50%;
+  padding: 1em;
+  background: #ffff;
 }
 </style>
