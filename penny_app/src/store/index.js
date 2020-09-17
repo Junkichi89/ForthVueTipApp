@@ -8,7 +8,8 @@ export default new Vuex.Store({
   state: {
     user: {
       username: null,
-      tip: null
+      tip: null,
+      email: null
     },
     dbUsers: []
   },
@@ -16,6 +17,7 @@ export default new Vuex.Store({
     setUser(state, userInfo) {
       state.user.username = userInfo.username,
       state.user.tip = userInfo.tip;
+      state.user.email = userInfo.email;
     },
     setDbUser(state, dbUsersInfo) {
       state.dbUsers.push(dbUsersInfo);
@@ -115,6 +117,10 @@ export default new Vuex.Store({
         .then(() => {
         })
     },
+    updateInfo: async function (context, user) {
+      await context.dispatch('getCurrentUser', user)
+      await context.dispatch('getDbUser', user)
+    }
   },
   modules: {
   }

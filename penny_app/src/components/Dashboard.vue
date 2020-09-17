@@ -2,8 +2,8 @@
   <div class="hello">
     <img alt="Vue logo" src="../assets/logo.png" />
     <h3>
-      <span class="greeting">{{ username }}さんようこそ！！</span>
-      <span>残高：{{ tip }}</span>
+      <span class="greeting">{{ currentUser.username }}さんようこそ！！</span>
+      <span>残高：{{ currentUser.tip }}</span>
       <span>
         <button @click="signOut">ログアウト</button>
       </span>
@@ -21,8 +21,8 @@
         <td>{{ user.username}}</td>
         <td>
           <div class="example-modal-window">
-            <button @click="openModal(user)">walletを見る</button>
-            <wallet-modal v-show="content" @close="closeModal">
+            <button @click="openWalletModal(user)">walletを見る</button>
+            <wallet-modal v-show="walletContent" @close="closeModal">
               <template slot="header">
                 <p>{{ modalUser.username }}さんの残高</p>
               </template>
@@ -32,7 +32,19 @@
           </div>
         </td>
         <td>
-          <button>送る</button>
+          <button @click="openMoneyModal(user)">送る</button>
+          <wallet-modal v-show="moneyContent" @close="closeModal">
+              <template slot="header">
+                <p>あなたの残高：{{ currentUser.tip}}</p>
+              </template>
+              <template slot="body">
+                   送る金額<br>
+                  <input type="number" v-model="sendingMoney"><br>
+                </template>
+              <template slot="footer">
+                <button @click="transferMoney">送信</button>
+                </template>
+            </wallet-modal>
         </td>
       </tr>
     </table>
@@ -50,8 +62,10 @@ export default {
   components: { walletModal },
   data() {
     return {
-      content: false,
+      walletContent: false,
+      moneyContent: false,
       modalUser: '',
+      sendingMoney: null
     };
   },
   created() {
@@ -66,14 +80,11 @@ export default {
     });
   },
   computed: {
-    username() {
-      return this.$store.getters.user.username;
-    },
-    tip() {
-      return this.$store.getters.user.tip;
+    currentUser() {
+      return this.$store.getters.user
     },
     dbUsers() {
-      return this.$store.getters.dbUsers;
+      return this.$store.getters.dbUsers
     },
   },
   methods: {
@@ -81,15 +92,52 @@ export default {
       this.$store.dispatch('signOut');
       this.$router.push('/Login');
     },
-    openModal: function (user) {
-      (this.content = true), (this.modalUser = user);
+    openWalletModal: function (user) {
+      this.walletContent = true,
+      this.modalUser = user;
+    },
+    openMoneyModal: function (user) {
+      this.moneyContent = true,
+      this.modalUser = user;
     },
     closeModal: function () {
-      this.content = false;
+      this.walletContent = false;
+      this.moneyContent = false;
     },
     clickEvent: function () {
       this.$emit('from-child');
     },
+    transferMoney: function () {
+      const db = firebase.firestore();
+      const users = db.collection('users');
+      users.where('username', '==', this.currentUser.username).get()
+      .then(data => {
+        data.forEach(doc => {
+          const userTip = parseInt(this.currentUser.tip)
+          const money = parseInt(this.sendingMoney)
+          doc.ref.update({ 
+            tip: userTip - money
+          })
+        })
+      })
+
+      users.where('username', '==', this.modalUser.username).get()
+      .then(data => {
+        data.forEach(doc => {
+          const userTip = parseInt(this.modalUser.tip)
+          const money = parseInt(this.sendingMoney)
+          doc.ref.update({
+            tip: userTip + money
+          })
+        })
+      })
+
+      .then(() => {
+        const userInfo = this.currentUser
+        this.sendingMoney = null
+        this.$store.dispatch('updateInfo', userInfo)
+      })
+    }
   },
 };
 </script>
