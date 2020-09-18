@@ -120,7 +120,7 @@ export default {
           })
         })
       })
-
+      
       users.where('username', '==', this.modalUser.username).get()
       .then(data => {
         data.forEach(doc => {
@@ -131,7 +131,6 @@ export default {
           })
         })
       })
-
       .then(() => {
         const userInfo = this.currentUser
         this.sendingMoney = null
