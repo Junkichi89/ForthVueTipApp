@@ -1,4 +1,10 @@
 # 投げ銭アプリ
+- テストアカウント  
+ユーザー名　new  
+Password newnew  
+E-mail new@gmail.com  
+
+でログインできます。
 
 ## Project setup
 ```
