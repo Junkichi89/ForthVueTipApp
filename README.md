@@ -1,10 +1,17 @@
 # 投げ銭アプリ
+
+登録ユーザーに仮想のお金を送ることができるアプリです。
+
 - テストアカウント  
 ユーザー名　new  
 Password newnew  
 E-mail new@gmail.com  
 
 でログインできます。
+
+## Site URL
+
+https://throwing-penny.web.app/
 
 ## Project setup
 ```
